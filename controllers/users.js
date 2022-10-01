@@ -34,11 +34,11 @@ module.exports.getUser = (req, res) => {
     .orFail(new NotFoundError(`Пользователь с id '${req.params.userId}' не найден`))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === 'NotFound') {
-        res.status(404).send({ message: notFoundError.message });
-      }
       if (err.name === 'CastError') {
         res.status(400).send({ message: validationError.message });
+      }
+      if (err.errorCode === 404) {
+        res.status(404).send({ message: notFoundError.message });
       } else {
         res.status(500).send({ message: defaultError.message });
       }

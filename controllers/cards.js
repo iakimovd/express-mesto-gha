@@ -34,7 +34,7 @@ module.exports.deleteCard = (req, res) => {
     .orFail(new NotFoundError(`Карточка с id '${req.params.cardId}' не найдена`))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === 'NotFound') {
+      if (err.errorCode === 404) {
         res.status(404).send({ message: notFoundError.message });
       }
       if (err.name === 'CastError') {
@@ -53,7 +53,7 @@ module.exports.likeCard = (req, res) => {
   ).orFail(new NotFoundError(`Карточка с id '${req.params.cardId}' не найдена`))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === 'NotFound') {
+      if (err.errorCode === 404) {
         res.status(404).send({ message: notFoundError.message });
       }
       if (err.name === 'CastError') {
@@ -72,7 +72,7 @@ module.exports.dislikeCard = (req, res) => {
   ).orFail(new NotFoundError(`Карточка с id '${req.params.cardId}' не найдена`))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === 'NotFound') {
+      if (err.errorCode === 404) {
         res.status(404).send({ message: notFoundError.message });
       }
       if (err.name === 'CastError') {

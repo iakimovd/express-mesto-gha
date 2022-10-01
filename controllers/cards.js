@@ -11,7 +11,7 @@ const validationError = new ValidationError('Переданы некоррект
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch(() => res.status(500).send({ message: defaultError }));
+    .catch(() => res.status(500).send({ message: defaultError.message }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -22,9 +22,9 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: validationError });
+        res.status(400).send({ message: validationError.message });
       } else {
-        res.status(500).send({ message: defaultError });
+        res.status(500).send({ message: defaultError.message });
       }
     });
 };
@@ -35,12 +35,12 @@ module.exports.deleteCard = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'NotFound') {
-        res.status(404).send({ message: notFoundError });
+        res.status(404).send({ message: notFoundError.message });
       }
       if (err.name === 'CastError') {
-        res.status(400).send({ message: validationError });
+        res.status(400).send({ message: validationError.message });
       } else {
-        res.status(500).send({ message: defaultError });
+        res.status(500).send({ message: defaultError.message });
       }
     });
 };
@@ -54,12 +54,12 @@ module.exports.likeCard = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'NotFound') {
-        res.status(404).send({ message: notFoundError });
+        res.status(404).send({ message: notFoundError.message });
       }
       if (err.name === 'CastError') {
-        res.status(400).send({ message: validationError });
+        res.status(400).send({ message: validationError.message });
       } else {
-        res.status(500).send({ message: defaultError });
+        res.status(500).send({ message: defaultError.message });
       }
     });
 };
@@ -73,12 +73,12 @@ module.exports.dislikeCard = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'NotFound') {
-        res.status(404).send({ message: notFoundError });
+        res.status(404).send({ message: notFoundError.message });
       }
       if (err.name === 'CastError') {
-        res.status(400).send({ message: validationError });
+        res.status(400).send({ message: validationError.message });
       } else {
-        res.status(500).send({ message: defaultError });
+        res.status(500).send({ message: defaultError.message });
       }
     });
 };

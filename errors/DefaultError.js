@@ -1,7 +1,7 @@
 class DefaultError extends Error {
   constructor(message) {
     super(message);
-    this.errorMessage = message;
+    this.message = message;
     this.name = 'DefaultError';
     this.errorCode = 500;
   }

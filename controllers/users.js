@@ -1,5 +1,6 @@
 const User = require('../models/user');
 
+const { NOT_FOUND_CODE, SERVER_ERROR_CODE, VALIDATION_ERROR_CODE } = require('../utils/constants');
 const DefaultError = require('../errors/DefaultError');
 const NotFoundError = require('../errors/NotFoundError');
 const ValidationError = require('../errors/ValidationError');
@@ -11,7 +12,7 @@ const validationError = new ValidationError('Переданы некоррект
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(() => res.status(SERVER_ERROR_CODE).send({ message: defaultError.message }));
 };
 
 module.exports.createUser = (req, res) => {
@@ -21,9 +22,9 @@ module.exports.createUser = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: validationError.message });
+        res.status(VALIDATION_ERROR_CODE).send({ message: validationError.message });
       } else {
-        res.status(500).send({ message: defaultError.message });
+        res.status(SERVER_ERROR_CODE).send({ message: defaultError.message });
       }
     });
 };
@@ -35,12 +36,12 @@ module.exports.getUser = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: validationError.message });
+        res.status(VALIDATION_ERROR_CODE).send({ message: validationError.message });
       }
-      if (err.errorCode === 404) {
-        res.status(404).send({ message: notFoundError.message });
+      if (err.errorCode === NOT_FOUND_CODE) {
+        res.status(NOT_FOUND_CODE).send({ message: notFoundError.message });
       } else {
-        res.status(500).send({ message: defaultError.message });
+        res.status(SERVER_ERROR_CODE).send({ message: defaultError.message });
       }
     });
 };
@@ -52,12 +53,12 @@ module.exports.updateProfile = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'NotFound') {
-        res.status(404).send({ message: notFoundError.message });
+        res.status(NOT_FOUND_CODE).send({ message: notFoundError.message });
       }
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: validationError.message });
+        res.status(VALIDATION_ERROR_CODE).send({ message: validationError.message });
       } else {
-        res.status(500).send({ message: defaultError.message });
+        res.status(SERVER_ERROR_CODE).send({ message: defaultError.message });
       }
     });
 };
@@ -69,12 +70,12 @@ module.exports.updateAvatar = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'NotFound') {
-        res.status(404).send({ message: notFoundError.message });
+        res.status(NOT_FOUND_CODE).send({ message: notFoundError.message });
       }
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: validationError.message });
+      if (err.name === 'ValidationError') {
+        res.status(VALIDATION_ERROR_CODE).send({ message: validationError.message });
       } else {
-        res.status(500).send({ message: defaultError.message });
+        res.status(SERVER_ERROR_CODE).send({ message: defaultError.message });
       }
     });
 };

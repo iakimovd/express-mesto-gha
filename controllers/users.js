@@ -3,9 +3,9 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 const { NOT_FOUND_CODE, SERVER_ERROR_CODE, VALIDATION_ERROR_CODE } = require('../utils/constants');
-const DefaultError = require('../errors/DefaultError');
-const NotFoundError = require('../errors/NotFoundError');
-const ValidationError = require('../errors/ValidationError');
+const DefaultError = require('../errors/InternalServerError');
+const NotFoundError = require('../errors/NotFound');
+const ValidationError = require('../errors/BadRequest');
 
 const defaultError = new DefaultError('Ошибка по умолчанию');
 const notFoundError = new NotFoundError('Карточка или пользователь не найден');

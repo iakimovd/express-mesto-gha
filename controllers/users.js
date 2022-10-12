@@ -29,9 +29,7 @@ module.exports.createUser = (req, res, next) => {
     .then((user) => {
       res.status(201).send({ _id: user._id, email: user.email });
     })
-    .catch((err) => {
-      res.status(400).send(err);
-    });
+    .catch(next);
 };
 
 module.exports.login = (req, res) => {

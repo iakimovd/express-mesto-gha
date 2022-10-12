@@ -1,13 +1,13 @@
 const Card = require('../models/card');
 
 const { NOT_FOUND_CODE, SERVER_ERROR_CODE, VALIDATION_ERROR_CODE } = require('../utils/constants');
-const DefaultError = require('../errors/InternalServerError');
-const NotFoundError = require('../errors/NotFound');
-const ValidationError = require('../errors/BadRequest');
+const InternalServerError = require('../errors/InternalServerError');
+const NotFound = require('../errors/NotFound');
+const BadRequest = require('../errors/BadRequest');
 
-const defaultError = new DefaultError('Ошибка по умолчанию');
-const notFoundError = new NotFoundError('Карточка или пользователь не найден');
-const validationError = new ValidationError('Переданы некорректные данные в методы');
+const defaultError = new InternalServerError('Ошибка по умолчанию');
+const notFoundError = new NotFound('Карточка или пользователь не найден');
+const validationError = new BadRequest('Переданы некорректные данные в методы');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
@@ -32,7 +32,7 @@ module.exports.createCard = (req, res) => {
 
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .orFail(new NotFoundError(`Карточка с id '${req.params.cardId}' не найдена`))
+    .orFail(new NotFound(`Карточка с id '${req.params.cardId}' не найдена`))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.errorCode === NOT_FOUND_CODE) {
@@ -51,7 +51,7 @@ module.exports.likeCard = (req, res) => {
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
-  ).orFail(new NotFoundError(`Карточка с id '${req.params.cardId}' не найдена`))
+  ).orFail(new NotFound(`Карточка с id '${req.params.cardId}' не найдена`))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.errorCode === NOT_FOUND_CODE) {
@@ -70,7 +70,7 @@ module.exports.dislikeCard = (req, res) => {
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
-  ).orFail(new NotFoundError(`Карточка с id '${req.params.cardId}' не найдена`))
+  ).orFail(new NotFound(`Карточка с id '${req.params.cardId}' не найдена`))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.errorCode === NOT_FOUND_CODE) {

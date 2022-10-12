@@ -1,3 +1,5 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 const { NOT_FOUND_CODE, SERVER_ERROR_CODE, VALIDATION_ERROR_CODE } = require('../utils/constants');
@@ -15,21 +17,71 @@ module.exports.getUsers = (req, res) => {
     .catch(() => res.status(SERVER_ERROR_CODE).send({ message: defaultError.message }));
 };
 
-module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-
-  User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
+module.exports.createUser = (req, res, next) => {
+  bcrypt.hash(req.body.password, 10)
+    .then((hash) => User.create({
+      email: req.body.email,
+      password: hash, // записываем хеш в базу
+      name: req.body.name,
+      about: req.body.about,
+      avatar: req.body.avatar,
+    }))
+    .then((user) => {
+      res.status(201).send({ _id: user._id, email: user.email });
+    })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      res.status(400).send(err);
+    });
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  User.findOne({ email }).select('+password')
+    .then((user) => {
+      if (!user) {
+        return Promise.reject(new Error('Неправильные почта или пароль'));
+      }
+
+      return bcrypt.compare(password, user.password);
+    })
+    .then((user) => {
+      if (!user) {
+        // хеши не совпали — отклоняем промис
+        Promise.reject(new Error('Неправильные почта или пароль'));
+      }
+      const token = jwt.sign(
+        { _id: user._id },
+        { expiresIn: '7d' }, // токен будет просрочен через час после создания
+      );
+      // аутентификация успешна
+      res.send({ token });
+    })
+    .catch((err) => {
+      res
+        .status(401)
+        .send({ message: err.message });
+    });
+};
+
+module.exports.getUser = (req, res) => {
+  const { userId } = req.params;
+  User.findById(userId)
+    .orFail(new NotFoundError(`Пользователь с id '${req.params.userId}' не найден`))
+    .then((card) => res.send({ data: card }))
+    .catch((err) => {
+      if (err.name === 'CastError') {
         res.status(VALIDATION_ERROR_CODE).send({ message: validationError.message });
+      }
+      if (err.errorCode === NOT_FOUND_CODE) {
+        res.status(NOT_FOUND_CODE).send({ message: notFoundError.message });
       } else {
         res.status(SERVER_ERROR_CODE).send({ message: defaultError.message });
       }
     });
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUserInfo = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
     .orFail(new NotFoundError(`Пользователь с id '${req.params.userId}' не найден`))

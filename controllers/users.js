@@ -11,7 +11,7 @@ const Conflict = require('../errors/Conflict'); // 409
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.send({ data: users }))
+    .then((users) => res.status(200).send({ data: users }))
     .catch((err) => next(err));
 };
 
@@ -59,7 +59,7 @@ module.exports.login = (req, res, next) => {
         { expiresIn: '7d' }, // токен будет просрочен через час после создания
       );
       // аутентификация успешна
-      res.status(201).send({ token });
+      res.status(200).send({ token });
     })
     .catch(next);
 };
@@ -68,7 +68,7 @@ module.exports.getUser = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
     .orFail(new NotFound(`Пользователь с id '${req.params.userId}' не найден`))
-    .then((user) => res.status(201).send({ data: user }))
+    .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequest('Переданы некорректные данные'));
@@ -82,7 +82,7 @@ module.exports.getUserInfo = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
     .orFail(new NotFound(`Пользователь с id '${req.params.userId}' не найден`))
-    .then((user) => res.status(201).send({ data: user }))
+    .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequest('Переданы некорректные данные'));
@@ -96,7 +96,7 @@ module.exports.updateProfile = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .orFail(new NotFound(`Пользователь с id '${req.params.userId}' не найден`))
-    .then((user) => res.status(201).send({ data: user }))
+    .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequest('Переданы некорректные данные'));
@@ -110,7 +110,7 @@ module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .orFail(new NotFound(`Пользователь с id '${req.params.userId}' не найден`))
-    .then((user) => res.status(201).send({ data: user }))
+    .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequest('Переданы некорректные данные'));

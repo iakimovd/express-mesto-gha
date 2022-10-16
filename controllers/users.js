@@ -7,7 +7,7 @@ const NotFound = require('../errors/NotFound'); // 404
 const BadRequest = require('../errors/BadRequest'); // 400
 const Unauthorized = require('../errors/Unauthorized'); // 401
 // const Forbidden = require('../errors/Forbidden'); // 403
-// const Conflict = require('../errors/Conflict'); // 409
+const Conflict = require('../errors/Conflict'); // 409
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -27,7 +27,15 @@ module.exports.createUser = (req, res, next) => {
     .then((user) => {
       res.status(201).send({ _id: user._id, email: user.email });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequest('Неверный запрос'));
+      } else if (err.code === 11000) {
+        next(new Conflict('Пользователь с этим email уже существует'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.login = (req, res, next) => {

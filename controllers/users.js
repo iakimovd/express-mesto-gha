@@ -2,12 +2,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-const InternalServerError = require('../errors/InternalServerError'); // 500
+// const InternalServerError = require('../errors/InternalServerError'); // 500
 const NotFound = require('../errors/NotFound'); // 404
 const BadRequest = require('../errors/BadRequest'); // 400
 const Unauthorized = require('../errors/Unauthorized'); // 401
-const Forbidden = require('../errors/Forbidden'); // 403
-const Conflict = require('../errors/Conflict'); // 409
+// const Forbidden = require('../errors/Forbidden'); // 403
+// const Conflict = require('../errors/Conflict'); // 409
 
 // const defaultError = new DefaultError('Ошибка по умолчанию');
 // const notFoundError = new NotFoundError('Карточка или пользователь не найден');

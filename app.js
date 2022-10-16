@@ -41,11 +41,11 @@ app.use(auth);
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
+app.use(errors()); // обработчик ошибок celebrate
+
 app.use('/*', (req, res, next) => {
   next(new BadRequest('Page not found'));
 });
-
-app.use(errors()); // обработчик ошибок celebrate
 
 app.use((err, req, res, next) => {
   // если у ошибки нет статуса, выставляем 500

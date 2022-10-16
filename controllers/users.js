@@ -9,10 +9,6 @@ const Unauthorized = require('../errors/Unauthorized'); // 401
 // const Forbidden = require('../errors/Forbidden'); // 403
 // const Conflict = require('../errors/Conflict'); // 409
 
-// const defaultError = new DefaultError('Ошибка по умолчанию');
-// const notFoundError = new NotFoundError('Карточка или пользователь не найден');
-// const validationError = new ValidationError('Переданы некорректные данные в методы');
-
 module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))

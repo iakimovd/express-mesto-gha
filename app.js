@@ -5,7 +5,7 @@ const { celebrate, Joi, errors } = require('celebrate');
 const auth = require('./middlewares/auth');
 const { login, createUser } = require('./controllers/users');
 
-const BadRequest = require('./errors/BadRequest'); // 400
+const NotFound = require('./errors/NotFound'); // 400
 
 const { PORT = 3000 } = process.env;
 
@@ -44,7 +44,7 @@ app.use('/cards', require('./routes/cards'));
 app.use(errors()); // обработчик ошибок celebrate
 
 app.use('/*', (req, res, next) => {
-  next(new BadRequest('Page not found'));
+  next(new NotFound('Page not found'));
 });
 
 app.use((err, req, res, next) => {

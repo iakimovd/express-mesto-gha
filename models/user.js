@@ -5,13 +5,13 @@ const userSchema = new mongoose.Schema({
   name: {
     type: String,
     minlength: [2, 'Must be at least 2, got {VALUE}'],
-    maxlength: [30, 'Must be at max 2, got {VALUE}'],
+    maxlength: [30, 'Must be at max 30, got {VALUE}'],
     default: 'Жак-Ив Кусто',
   },
   about: {
     type: String,
     minlength: [2, 'Must be at least 2, got {VALUE}'],
-    maxlength: [30, 'Must be at max 2, got {VALUE}'],
+    maxlength: [30, 'Must be at max 30, got {VALUE}'],
     default: 'Исследователь',
   },
   avatar: {
@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-userSchema.path('password').validate((val) => {
+userSchema.path('avatar').validate((val) => {
   const urlRegex = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/;
   return urlRegex.test(val);
 }, 'Invalid URL.');

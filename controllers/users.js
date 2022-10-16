@@ -2,19 +2,21 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-const { NOT_FOUND_CODE, SERVER_ERROR_CODE, VALIDATION_ERROR_CODE } = require('../utils/constants');
-const DefaultError = require('../errors/InternalServerError');
-const NotFoundError = require('../errors/NotFound');
-const ValidationError = require('../errors/BadRequest');
+const InternalServerError = require('../errors/InternalServerError'); // 500
+const NotFound = require('../errors/NotFound'); // 404
+const BadRequest = require('../errors/BadRequest'); // 400
+const Unauthorized = require('../errors/Unauthorized'); // 401
+const Forbidden = require('../errors/Forbidden'); // 403
+const Conflict = require('../errors/Conflict'); // 409
 
-const defaultError = new DefaultError('Ошибка по умолчанию');
-const notFoundError = new NotFoundError('Карточка или пользователь не найден');
-const validationError = new ValidationError('Переданы некорректные данные в методы');
+// const defaultError = new DefaultError('Ошибка по умолчанию');
+// const notFoundError = new NotFoundError('Карточка или пользователь не найден');
+// const validationError = new ValidationError('Переданы некорректные данные в методы');
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(() => res.status(SERVER_ERROR_CODE).send({ message: defaultError.message }));
+    .catch((err) => next(err));
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -32,13 +34,13 @@ module.exports.createUser = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('Неправильные почта или пароль'));
+        return Promise.reject(new Unauthorized('Неправильные почта или пароль'));
       }
 
       return bcrypt.compare(password, user.password);
@@ -46,7 +48,7 @@ module.exports.login = (req, res) => {
     .then((user) => {
       if (!user) {
         // хеши не совпали — отклоняем промис
-        Promise.reject(new Error('Неправильные почта или пароль'));
+        Promise.reject(new Unauthorized('Неправильные почта или пароль'));
       }
       const token = jwt.sign(
         { _id: user._id },
@@ -55,77 +57,61 @@ module.exports.login = (req, res) => {
       // аутентификация успешна
       res.send({ token });
     })
-    .catch((err) => {
-      res
-        .status(401)
-        .send({ message: err.message });
-    });
+    .catch(next);
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
-    .orFail(new NotFoundError(`Пользователь с id '${req.params.userId}' не найден`))
+    .orFail(new NotFound(`Пользователь с id '${req.params.userId}' не найден`))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(VALIDATION_ERROR_CODE).send({ message: validationError.message });
-      }
-      if (err.errorCode === NOT_FOUND_CODE) {
-        res.status(NOT_FOUND_CODE).send({ message: notFoundError.message });
+        next(new BadRequest('Переданы некорректные данные'));
       } else {
-        res.status(SERVER_ERROR_CODE).send({ message: defaultError.message });
+        next(err);
       }
     });
 };
 
-module.exports.getUserInfo = (req, res) => {
+module.exports.getUserInfo = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
-    .orFail(new NotFoundError(`Пользователь с id '${req.params.userId}' не найден`))
+    .orFail(new NotFound(`Пользователь с id '${req.params.userId}' не найден`))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(VALIDATION_ERROR_CODE).send({ message: validationError.message });
-      }
-      if (err.errorCode === NOT_FOUND_CODE) {
-        res.status(NOT_FOUND_CODE).send({ message: notFoundError.message });
+        next(new BadRequest('Переданы некорректные данные'));
       } else {
-        res.status(SERVER_ERROR_CODE).send({ message: defaultError.message });
+        next(err);
       }
     });
 };
 
-module.exports.updateProfile = (req, res) => {
+module.exports.updateProfile = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
-    .orFail(new NotFoundError(`Пользователь с id '${req.params.userId}' не найден`))
+    .orFail(new NotFound(`Пользователь с id '${req.params.userId}' не найден`))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === 'NotFound') {
-        res.status(NOT_FOUND_CODE).send({ message: notFoundError.message });
-      }
       if (err.name === 'ValidationError') {
-        res.status(VALIDATION_ERROR_CODE).send({ message: validationError.message });
+        next(new BadRequest('Переданы некорректные данные'));
       } else {
-        res.status(SERVER_ERROR_CODE).send({ message: defaultError.message });
+        next(err);
       }
     });
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .orFail(new NotFoundError(`Пользователь с id '${req.params.userId}' не найден`))
+    .orFail(new NotFound(`Пользователь с id '${req.params.userId}' не найден`))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === 'NotFound') {
-        res.status(NOT_FOUND_CODE).send({ message: notFoundError.message });
-      }
       if (err.name === 'ValidationError') {
-        res.status(VALIDATION_ERROR_CODE).send({ message: validationError.message });
+        next(new BadRequest('Переданы некорректные данные'));
       } else {
-        res.status(SERVER_ERROR_CODE).send({ message: defaultError.message });
+        next(err);
       }
     });
 };

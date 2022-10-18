@@ -2,7 +2,7 @@ const { celebrate, Joi } = require('celebrate');
 
 const router = require('express').Router();
 const {
-  getUsers, getUserInfoMe, updateProfile, updateAvatar, getUser,
+  getUsers, getUserInfoMe, updateProfile, updateAvatar, getUserById,
 } = require('../controllers/users');
 
 router.get('/me', getUserInfoMe); // возвращает информацию о текущем пользователе
@@ -13,7 +13,7 @@ router.get('/:userId', celebrate({
   params: Joi.object().keys({
     userId: Joi.string().alphanum().length(24).hex(),
   }),
-}), getUser);
+}), getUserById);
 
 router.patch('/me', celebrate({
   body: Joi.object().keys({

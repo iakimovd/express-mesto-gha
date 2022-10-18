@@ -72,7 +72,7 @@ module.exports.getUserInfoMe = (req, res, next) => {
     });
 };
 
-module.exports.getUser = (req, res, next) => {
+module.exports.getUserById = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
     .orFail(new NotFound(`Пользователь с id '${req.params.userId}' не найден`))

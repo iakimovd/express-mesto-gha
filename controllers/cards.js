@@ -4,7 +4,7 @@ const Card = require('../models/card');
 const NotFound = require('../errors/NotFound'); // 404
 const BadRequest = require('../errors/BadRequest'); // 400
 // const Unauthorized = require('../errors/Unauthorized'); // 401
-// const Forbidden = require('../errors/Forbidden'); // 403
+const Forbidden = require('../errors/Forbidden'); // 403
 // const Conflict = require('../errors/Conflict'); // 409
 
 module.exports.getCards = (req, res, next) => {
@@ -29,16 +29,17 @@ module.exports.createCard = (req, res, next) => {
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .orFail(new NotFound(`Карточка с id '${req.params.cardId}' не найдена`))
-    .then((card) => res.status(200).send({ data: card }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequest('Переданы некорректные данные'));
-      } else {
-        next(err);
+  const { cardId } = req.params;
+  Card.findById(cardId)
+    .orFail(new NotFound(`Карточка с id '${cardId}' не найдена`))
+    .then((card) => {
+      if (!card.owner.equals(req.user.id)) {
+        return next(new Forbidden('Нельзя удалить чужую карточку'));
       }
-    });
+      return card.remove()
+        .then(() => res.send({ message: 'Карточка удалена' }));
+    })
+    .catch(next);
 };
 
 module.exports.likeCard = (req, res, next) => {

@@ -7,6 +7,8 @@ const {
 
 router.get('/', getUsers);
 
+router.get('/me', getUserInfo); // возвращает информацию о текущем пользователе
+
 router.get('/:userId', celebrate({
   params: Joi.object().keys({
     userId: Joi.string().alphanum().length(24).hex(),
@@ -22,10 +24,8 @@ router.patch('/me', celebrate({
 
 router.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().required().regex(/(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/),
+    avatar: Joi.string().required().regex(/(ftp|http|https):\/\/([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/),
   }),
 }), updateAvatar); // обновляет аватар
-
-router.get('/me', getUserInfo); // возвращает информацию о текущем пользователе
 
 module.exports = router;

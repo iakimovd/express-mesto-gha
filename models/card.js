@@ -27,7 +27,7 @@ const cardSchema = new mongoose.Schema({
 });
 
 cardSchema.path('link').validate((val) => {
-  const urlRegex = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/;
+  const urlRegex = /(ftp|http|https):\/\/([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
   return urlRegex.test(val);
 }, 'Invalid URL.');
 

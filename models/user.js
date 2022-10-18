@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcryptjs');
+const Unauthorized = require('../errors/Unauthorized'); // 401
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -40,8 +42,24 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.path('avatar').validate((val) => {
-  const urlRegex = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/;
+  const urlRegex = /(ftp|http|https):\/\/([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
   return urlRegex.test(val);
 }, 'Invalid URL.');
+
+userSchema.statics.findUserByCredentials = function (email, password) {
+  return this.findOne({ email }).select('+password')
+    .then((user) => {
+      if (!user) {
+        return Promise.reject(new Unauthorized('Указаны неправильные Email или пароль.'));
+      }
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            return Promise.reject(new Unauthorized('Указаны неправильные Email или пароль.'));
+          }
+          return user;
+        });
+    });
+};
 
 module.exports = mongoose.model('user', userSchema);

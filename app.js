@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const { celebrate, Joi, errors } = require('celebrate');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const handleErrors = require('./middlewares/handleErrors'); // Функция обработки ошибок
 const NotFound = require('./errors/NotFound'); // 400
 
 const { PORT = 3000 } = process.env;
@@ -46,20 +47,7 @@ app.use('/*', (req, res, next) => {
   next(new NotFound('Page not found'));
 });
 
-app.use((err, req, res, next) => {
-  // если у ошибки нет статуса, выставляем 500
-  const { statusCode = 500, message } = err;
-
-  res
-    .status(statusCode)
-    .send({
-      // проверяем статус и выставляем сообщение в зависимости от него
-      message: statusCode === 500
-        ? 'На сервере произошла ошибка'
-        : message,
-    });
-  next(err);
-});
+app.use(handleErrors);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);

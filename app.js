@@ -2,9 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { celebrate, Joi, errors } = require('celebrate');
-const auth = require('./middlewares/auth');
 const { login, createUser } = require('./controllers/users');
-
+const auth = require('./middlewares/auth');
 const NotFound = require('./errors/NotFound'); // 400
 
 const { PORT = 3000 } = process.env;

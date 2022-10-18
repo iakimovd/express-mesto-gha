@@ -55,11 +55,14 @@ module.exports.login = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.getUser = (req, res, next) => {
-  const { userId } = req.params;
-  User.findById(userId)
-    .orFail(new NotFound(`Пользователь с id '${req.params.userId}' не найден`))
-    .then((user) => res.status(200).send({ data: user }))
+module.exports.getUserInfoMe = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user._id) {
+        next(new NotFound('Пользователь не найден'));
+      }
+      res.status(200).send(user);
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequest('Переданы некорректные данные'));
@@ -69,9 +72,10 @@ module.exports.getUser = (req, res, next) => {
     });
 };
 
-module.exports.getUserInfo = (req, res, next) => {
-  User.findById(req.user._id)
-    .orFail(new NotFound('Пользователь не найден'))
+module.exports.getUser = (req, res, next) => {
+  const { userId } = req.params;
+  User.findById(userId)
+    .orFail(new NotFound(`Пользователь с id '${req.params.userId}' не найден`))
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError') {
